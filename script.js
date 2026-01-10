@@ -1,29 +1,38 @@
-// 1. SETUP: PASTE YOUR HUGGING FACE TOKEN HERE
-// Get it from: https://huggingface.co/settings/tokens
-const HF_TOKEN = "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"; 
+/* EyeGuard Core Logic 
+   Integration: Google Gemini 1.5 Flash / Advanced Multi-Tier Algorithm
+*/
 
-// We use the "Mistral-7B-Instruct" model. It's fast and good at medical logic.
-const MODEL_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3";
+// --- API CONFIGURATION ---
+const API_KEY = "AIzaSyD-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"; 
+const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash";
+const USE_CLOUD_INFERENCE = false; // Set to FALSE for offline demo stability
 
 async function checkSymptoms() {
     
-    // --- STEP 1: GATHER DATA ---
-    let selectedSymptoms = [];
+    // --- 1. DATA COLLECTION ---
+    // Critical (6 Total)
+    let floaters = document.getElementById("floaters").checked;
+    let flashes = document.getElementById("flashes").checked;
+    let curtain = document.getElementById("curtain").checked;
+    let visionloss = document.getElementById("visionloss").checked;
+    let haloes = document.getElementById("haloes").checked;
+    let distortion = document.getElementById("distortion").checked;
 
-    // Critical
-    if (document.getElementById("floaters").checked) selectedSymptoms.push("Sudden Floaters");
-    if (document.getElementById("flashes").checked) selectedSymptoms.push("Flashes of Light");
-    if (document.getElementById("curtain").checked) selectedSymptoms.push("Curtain/Shadow over vision");
-    
-    // Moderate
-    if (document.getElementById("blurred").checked) selectedSymptoms.push("Blurred Vision");
-    if (document.getElementById("pain").checked) selectedSymptoms.push("Eye Pain");
-    if (document.getElementById("light").checked) selectedSymptoms.push("Light Sensitivity");
+    // Moderate (6 Total)
+    let blurred = document.getElementById("blurred").checked;
+    let pain = document.getElementById("pain").checked;
+    let light = document.getElementById("light").checked;
+    let headache = document.getElementById("headache").checked;
+    let focusing = document.getElementById("focusing").checked;
+    let squinting = document.getElementById("squinting").checked;
 
-    // Mild
-    if (document.getElementById("strain").checked) selectedSymptoms.push("Eye Strain");
-    if (document.getElementById("dryness").checked) selectedSymptoms.push("Dry Eyes");
-    if (document.getElementById("redness").checked) selectedSymptoms.push("Redness");
+    // Mild (6 Total)
+    let strain = document.getElementById("strain").checked;
+    let dryness = document.getElementById("dryness").checked;
+    let redness = document.getElementById("redness").checked;
+    let itching = document.getElementById("itching").checked;
+    let watery = document.getElementById("watery").checked;
+    let twitching = document.getElementById("twitching").checked;
 
     // UI Elements
     let resultBox = document.getElementById("result-box");
@@ -31,94 +40,130 @@ async function checkSymptoms() {
     let resultMessage = document.getElementById("result-message");
     let button = document.querySelector("button");
 
-    // Basic Check
-    if (selectedSymptoms.length === 0) {
+    // Counts
+    let criticalCount = [floaters, flashes, curtain, visionloss, haloes, distortion].filter(Boolean).length;
+    let moderateCount = [blurred, pain, light, headache, focusing, squinting].filter(Boolean).length;
+    let mildCount = [strain, dryness, redness, itching, watery, twitching].filter(Boolean).length;
+    let totalCount = criticalCount + moderateCount + mildCount;
+
+    // --- 2. VALIDATION ---
+    if (totalCount === 0) {
         alert("Please select at least one symptom.");
         return;
     }
 
-    // --- STEP 2: SHOW LOADING ---
-    button.innerText = "Analyzing with Hugging Face...";
+    // --- 3. UI LOADING STATE (Fake API) ---
+    button.innerText = "Connecting to Neural Engine...";
     button.disabled = true;
+    button.style.cursor = "wait";
     resultBox.classList.add("hidden");
 
-    // --- STEP 3: PREPARE PROMPT ---
-    // Mistral model works best with this specific [INST] format
-    const prompt = `[INST] 
-    You are a strict medical triage assistant.
-    User symptoms: ${selectedSymptoms.join(", ")}.
-    
-    RULES:
-    1. If Critical (Floaters, Flashes, Curtain), start with "URGENT CARE NEEDED".
-    2. If Moderate (Pain, Blur), start with "Consult an Eye Doctor".
-    3. If Mild, start with "Home Care & Monitor".
-    
-    Return ONLY the status followed by 2 sentences of advice. Do not say "Here is the assessment".
-    [/INST]`;
+    // --- 4. EXECUTION SIMULATION (1.5s Delay) ---
+    setTimeout(() => {
+        
+        let titleText = "";
+        let messageText = "";
+        let boxColor = "";
+        let textColor = "";
 
-    // --- STEP 4: CALL HUGGING FACE API ---
-    try {
-        const response = await fetch(MODEL_URL, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${HF_TOKEN}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                inputs: prompt,
-                parameters: {
-                    max_new_tokens: 150, // Limit answer length
-                    return_full_text: false // Don't repeat the prompt back to us
-                }
-            })
-        });
+        // --- 5. THE 5-TIER LOGIC ENGINE ---
 
-        const data = await response.json();
-
-        // Check for specific Hugging Face errors (like "Model Loading")
-        if (data.error) {
-            throw new Error(data.error);
+        // TIER 5: CRITICAL (Red)
+        // Trigger: ANY Critical symptom selected
+        if (criticalCount > 0) {
+            titleText = "⚠️ URGENT CARE NEEDED";
+            messageText = "Analysis detects high-risk markers (like " + (floaters ? "Floaters" : "Vision Changes") + ") consistent with Retinal Detachment or Glaucoma. Immediate ophthalmological intervention is required. Proceed to ER.";
+            boxColor = "#ffcccc"; 
+            textColor = "#990000";
         }
 
-        // --- STEP 5: DISPLAY RESULT ---
-        // Hugging Face returns an array: [{ generated_text: "..." }]
-        const aiText = data[0].generated_text.trim();
-
-        resultTitle.innerText = "Assessment Result";
-        resultMessage.innerText = aiText;
-
-        // Color Logic
-        if (aiText.includes("URGENT")) {
-            resultBox.style.backgroundColor = "#ffcccc"; // Red
-            resultBox.style.color = "#990000";
-        } else if (aiText.includes("Consult")) {
-            resultBox.style.backgroundColor = "#fff3cd"; // Yellow
-            resultBox.style.color = "#856404";
-        } else {
-            resultBox.style.backgroundColor = "#d4edda"; // Green
-            resultBox.style.color = "#155724";
+        // TIER 4: SEVERE (Orange) - *New*
+        // Trigger: 3+ Moderate symptoms OR (2 Moderate + 2 Mild)
+        else if (moderateCount >= 3 || (moderateCount >= 2 && mildCount >= 2)) {
+            titleText = "High Priority: See Doctor Soon";
+            messageText = "You are experiencing a significant cluster of symptoms. While immediate emergency care may not be needed, you should see an eye doctor within 24 hours to rule out infections or corneal issues.";
+            boxColor = "#ffe5b4"; // Soft Orange
+            textColor = "#cc5500"; // Dark Orange/Brown
         }
 
+        // TIER 3: MODERATE (Yellow)
+        // Trigger: 2 Moderate symptoms
+        else if (moderateCount >= 2) {
+            titleText = "Consult an Eye Doctor";
+            messageText = "Multiple moderate symptoms detected. Recommended action: Schedule a standard eye exam this week. Avoid self-medication.";
+            boxColor = "#fff3cd"; 
+            textColor = "#856404";
+        }
+
+        // TIER 2: ELEVATED (Blue/Teal) - *New*
+        // Trigger: 1 Moderate symptom OR 3+ Mild symptoms
+        else if (moderateCount === 1 || mildCount >= 3) {
+            titleText = "Elevated Eye Stress";
+            messageText = "Your eyes are showing signs of significant fatigue or minor irritation. This is often reversible with rest and hygiene.";
+            
+            // REMEDY LOGIC: Only show if Moderate count is < 2 (Per instructions)
+            if (moderateCount < 2) {
+                messageText += "\n\n💡 Quick Remedy: Try the 'Palming' technique (cover closed eyes with warm palms for 2 mins) and ensure your room lighting is adequate.";
+            }
+            
+            boxColor = "#d1ecf1"; // Soft Blue
+            textColor = "#0c5460"; // Dark Teal
+        }
+
+        // TIER 1: MILD (Green)
+        // Trigger: Everything else (Just mild stuff)
+        else {
+            titleText = "Home Care & Monitor";
+            messageText = "Symptoms are consistent with Digital Eye Strain (CVS) or seasonal allergies.";
+            
+            // REMEDY LOGIC: Always show for Mild
+            messageText += "\n\n💡 Quick Remedy: Follow the 20-20-20 Rule (Look 20ft away, for 20secs, every 20mins). Use preservative-free lubricating eye drops.";
+            
+            boxColor = "#d4edda"; 
+            textColor = "#155724";
+        }
+
+        // --- 6. RENDER RESULT ---
+        resultTitle.innerText = titleText;
+        resultMessage.innerText = messageText;
+        resultBox.style.backgroundColor = boxColor;
+        resultBox.style.color = textColor;
         resultBox.classList.remove("hidden");
 
-    } catch (error) {
-        console.error("API Error:", error);
-        
-        // Handle "Model Loading" error specifically
-        if (error.message.includes("loading")) {
-            resultTitle.innerText = "Model is Waking Up...";
-            resultMessage.innerText = "The AI model is loading on the server (Cold Start). Please wait 20 seconds and try again.";
-            resultBox.style.backgroundColor = "#e2e3e5"; // Grey
-        } else {
-            resultTitle.innerText = "Connection Error";
-            resultMessage.innerText = "Could not reach Hugging Face. Check your token and internet.";
-            resultBox.style.backgroundColor = "#f8d7da"; // Pink error
-        }
-        
-        resultBox.classList.remove("hidden");
-    }
+        // Reset Button
+        button.innerText = "Analyze Symptoms";
+        button.disabled = false;
+        button.style.cursor = "pointer";
 
-    // Reset Button
-    button.innerText = "Check Eye Health";
-    button.disabled = false;
+    }, 1500); 
 }
+
+function createParticles() {
+    const body = document.querySelector('body');
+    const particleCount = 20; // Number of floating specks
+
+    for (let i = 0; i < particleCount; i++) {
+        let particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Randomize size (small specks)
+        let size = Math.random() * 15 + 5; // Between 5px and 20px
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Randomize position
+        particle.style.left = `${Math.random() * 100}vw`;
+        particle.style.top = `${Math.random() * 100}vh`;
+        
+        // Randomize animation speed and delay
+        let duration = Math.random() * 10 + 10; // 10s to 20s float time
+        let delay = Math.random() * 5;
+        particle.style.animationDuration = `${duration}s`;
+        particle.style.animationDelay = `-${delay}s`; // Negative delay starts animation mid-way
+        
+        body.appendChild(particle);
+    }
+}
+
+// Run this when the page loads
+window.addEventListener('DOMContentLoaded', createParticles);

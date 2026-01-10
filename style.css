@@ -1,24 +1,59 @@
-/* 1. General Typography & Page Background */
+/* 1. ANIMATED BACKGROUND & PAGE SETUP */
 body {
-    font-family: 'Inter', sans-serif; /* Professional, clean font */
-    background-color: #f4f7f6; /* Very light cool grey */
+    font-family: 'Inter', sans-serif;
+    /* Medical Gradient Background */
+    background: linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 100%);
     color: #333;
     margin: 0;
     padding: 40px 20px;
     line-height: 1.6;
+    min-height: 100vh; /* Ensures bg covers full screen */
+    overflow-x: hidden; /* Prevents scrollbars from moving particles */
+    position: relative; /* Needed for particles to sit behind */
 }
 
-/* 2. Main Container - Making it look like a clean medical card */
+/* 2. THE FLOATING PARTICLES (Medical Debris) */
+.particle {
+    position: absolute;
+    background-color: rgba(0, 123, 255, 0.15); /* Faint Medical Blue */
+    border-radius: 50%;
+    pointer-events: none; /* Let clicks pass through them */
+    z-index: -1; /* Stay behind the content */
+    animation: floatUp 20s linear infinite;
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(100vh) scale(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-10vh) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* 3. MAIN CONTAINER (Frosted Glass Effect) */
 .container {
     max-width: 600px;
-    background-color: #ffffff;
+    /* Semi-transparent white for glass effect */
+    background-color: rgba(255, 255, 255, 0.85); 
+    backdrop-filter: blur(12px); /* THE BLUR MAGIC */
+    -webkit-backdrop-filter: blur(12px); /* Safari support */
     margin: 0 auto;
     padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Soft shadow */
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
-/* 3. Header Styling */
+/* 4. HEADER STYLING */
 header {
     text-align: center;
     margin-bottom: 30px;
@@ -33,29 +68,36 @@ h1 {
 
 .subtitle {
     margin-top: 8px;
-    color: #666;
+    color: #546e7a;
     font-size: 16px;
+    font-weight: 500;
 }
 
-/* 4. Symptom Groups - "Card" look inside the list */
+/* 5. SYMPTOM GROUPS (Clean Cards) */
 .group {
     margin-bottom: 25px;
     padding: 20px;
-    background-color: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.6); /* Slightly see-through */
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 12px;
+    transition: transform 0.2s ease;
 }
 
-/* Side borders to color-code categories */
-.mild-group { border-left: 6px solid #28a745; }    /* Green */
-.moderate-group { border-left: 6px solid #ffc107; } /* Yellow */
-.critical-group { border-left: 6px solid #dc3545; } /* Red */
+.group:hover {
+    transform: translateY(-2px); /* Subtle lift on hover */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Color-coded borders */
+.mild-group { border-left: 5px solid #28a745; }
+.moderate-group { border-left: 5px solid #ffc107; }
+.critical-group { border-left: 5px solid #dc3545; }
 
 h3 {
     margin-top: 0;
     margin-bottom: 15px;
     font-size: 18px;
-    color: #444;
+    color: #37474f;
 }
 
 .warning-text {
@@ -66,36 +108,41 @@ h3 {
     font-weight: 600;
 }
 
-/* 5. Inputs and Labels */
+/* 6. INPUTS & LABELS */
 label {
-    display: flex; /* Aligns checkbox and text perfectly */
+    display: flex;
     align-items: center;
     margin-bottom: 12px;
     font-size: 16px;
     cursor: pointer;
     color: #333;
+    transition: color 0.2s;
+}
+
+label:hover {
+    color: #007bff;
 }
 
 input[type="checkbox"] {
     width: 20px;
     height: 20px;
     margin-right: 12px;
-    cursor: pointer;
-    accent-color: #007bff; /* Makes the checkmark blue */
+    accent-color: #007bff;
 }
 
-/* 6. Visual Examples */
+/* 7. VISUAL EXAMPLES */
 .visual-example {
-    background-color: #f9f9f9;
+    background-color: rgba(255, 255, 255, 0.9);
     padding: 15px;
-    border-radius: 6px;
+    border-radius: 8px;
     margin-bottom: 15px;
+    border: 1px solid #eee;
 }
 
 .visual-example img {
     width: 100%;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+    border-radius: 6px;
+    border: 1px solid #eee;
     margin-top: 8px;
 }
 
@@ -105,33 +152,42 @@ input[type="checkbox"] {
     margin: 4px 0 8px 0;
 }
 
-/* 7. The Button - Solid, Big, Clickable */
+/* 8. BUTTON STYLING */
 button {
     display: block;
     width: 100%;
     padding: 18px;
     font-size: 18px;
     font-weight: 600;
-    background-color: #2c3e50; /* Dark Navy Blue - looks serious/professional */
+    background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%); /* Gradient Button */
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
-    transition: background-color 0.2s; /* Tiny fade on hover */
+    transition: transform 0.1s, box-shadow 0.2s;
     margin-top: 30px;
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
 }
 
 button:hover {
-    background-color: #1a252f; /* Slightly darker on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
 }
 
-/* 8. Results */
+button:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 9. RESULTS BOX */
 #result-box {
     margin-top: 30px;
     padding: 25px;
-    border-radius: 8px;
+    border-radius: 12px;
     text-align: center;
-    border: 1px solid transparent; /* Keeps sizing consistent */
+    border: 1px solid rgba(0,0,0,0.1);
 }
 
 #result-title {
@@ -143,12 +199,12 @@ button:hover {
     display: none;
 }
 
-/* 9. Disclaimer */
+/* 10. FOOTER */
 .disclaimer {
     margin-top: 40px;
     padding-top: 20px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid rgba(0,0,0,0.1);
     font-size: 12px;
-    color: #999;
+    color: #90a4ae;
     text-align: center;
 }

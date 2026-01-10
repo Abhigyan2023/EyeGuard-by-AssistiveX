@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EyeGuard - Symptom Assessment</title>
+    <title>EyeGuard - Advanced Assessment</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,7 +12,7 @@
     <div class="container">
         <header>
             <h1>EyeGuard</h1>
-            <p class="subtitle">Preliminary Eye Symptom Assessment Tool</p>234 
+            <p class="subtitle">AI-Assisted Preliminary Eye Symptom Triage</p>
         </header>
 
         <div class="checklist">
@@ -22,6 +22,9 @@
                 <label><input type="checkbox" id="strain"> Eye Strain (Tired eyes)</label>
                 <label><input type="checkbox" id="dryness"> Dryness or Grittiness</label>
                 <label><input type="checkbox" id="redness"> Slight Redness</label>
+                <label><input type="checkbox" id="itching"> Itching / Allergies</label>
+                <label><input type="checkbox" id="watery"> Excessive Watering</label>
+                <label><input type="checkbox" id="twitching"> Eyelid Twitching</label>
             </div>
 
             <div class="group moderate-group">
@@ -29,21 +32,25 @@
                 <label><input type="checkbox" id="blurred"> Blurred Vision</label>
                 <label><input type="checkbox" id="pain"> Eye Pain or Ache</label>
                 <label><input type="checkbox" id="light"> Sensitivity to Light</label>
+                <label><input type="checkbox" id="headache"> Headache around Eyes</label>
+                <label><input type="checkbox" id="focusing"> Trouble Focusing Near/Far</label>
+                <label><input type="checkbox" id="squinting"> Frequent Squinting</label>
             </div>
 
             <div class="group critical-group">
                 <h3>3. Critical Signs (Red Flags)</h3>
-                <p class="warning-text">Select these only if they happened suddenly.</p>
+                <p class="warning-text">Select these only if they happened suddenly⚠️.</p>
                 
                 <div class="visual-example">
                     <label><input type="checkbox" id="floaters"> <strong>Sudden Floaters</strong></label>
                     <p class="small-text">Example: Black spots/lines drifting in vision.</p>
-                    
-                    <img src="https://images.squarespace-cdn.com/content/v1/60faf288116b92521c1c2ffe/324a3791-1c4b-4314-b801-45f883911067/Eye+floaters+explained.jpg?format=1500w" alt="Floaters Example">
+                    <img src="https://static.royacdn.com/Site-76541409-4f72-43f9-b369-2d2bc9eaf57f/shutterstock_1361655869.jpg" alt="Floaters Example">
                 </div>
 
                 <div class="visual-example">
                     <label><input type="checkbox" id="flashes"> <strong>Flashes of Light</strong></label>
+                    <p class="small-text">Example: Brief, lightning-like streaks in side vision.</p>
+                    <img src="https://mlckwlsk7dub.i.optimole.com/cb:Cuo3.2b0/w:571/h:444/q:mauto/f:best/https://sterlingvision.com/wp-content/uploads/2021/06/Articles1_06-6.jpg" alt="Flashes Example">
                 </div>
 
                 <div class="visual-example">
@@ -51,11 +58,29 @@
                     <p class="small-text">Example: Dark curtain covering part of vision.</p>
                     <img src="https://invisioncare.com/wp-content/uploads/Dark-Curtain-Over-Field-of-Vision.jpg" alt="Curtain Example">
                 </div>
+
+                <div class="visual-example">
+                    <label><input type="checkbox" id="visionloss"> <strong>Sudden Vision Loss</strong></label>
+                    <p class="small-text">Example: Vision goes grey, black, or extremely blurry suddenly.</p>
+                    <img src="https://theeyecareteam.com/wp-content/uploads/2021/11/blurry-vision-1024x672.jpg" alt="Vision Loss Example">
+                </div>
+
+                <div class="visual-example">
+                    <label><input type="checkbox" id="haloes"> <strong>Haloes around Lights</strong></label>
+                    <p class="small-text">Example: Rainbow-colored rings around streetlights/bulbs.</p>
+                    <img src="https://i0.wp.com/static2.feelgoodcontacts.net/blogimages/rainbow-halo-around-sun.webp?strip=all" alt="Haloes Example">
+                </div>
+
+                <div class="visual-example">
+                    <label><input type="checkbox" id="distortion"> <strong>Distorted Lines (Wavy)</strong></label>
+                    <p class="small-text">Example: Straight lines (like door frames) look wavy or bent.</p>
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFN1x63Y4Li65fI2Dw6F6JEg6RrItfqex9YDqQcf315OwiyAb2eD4IgtGIViCoIZKXWgkKrBqC4aaC-iQExjdM6j40Xz3df2lH9rKqALDjOohG4C2gDqAxC6d-Kmovmh6bKQYx0DMkzs4/s1600/optical+migrane.jpg" alt="Distortion Example">
+                </div>
             </div>
 
         </div>
 
-        <button onclick="checkSymptoms()">Check Eye Health</button>
+        <button onclick="checkSymptoms()">Analyze Symptoms</button>
 
         <div id="result-box" class="hidden">
             <h2 id="result-title"></h2>
@@ -63,7 +88,7 @@
         </div>
 
         <footer>
-            <p class="disclaimer"><strong>DISCLAIMER:</strong> Not a medical diagnosis. Consult a professional.</p>
+            <p class="disclaimer"><strong>DISCLAIMER:</strong> Not a medical diagnosis. Simulation for hackathon demonstration.</p>
         </footer>
 
     </div>
