@@ -1,86 +1,113 @@
-function checkSymptoms() {
-    // 1. getting checkboxes (Inputs)
-    // taken elements by their specific id's from html file.
-    
-    // Critical Symptoms
-    let floaters = document.getElementById("floaters").checked;
-    let flashes = document.getElementById("flashes").checked;
-    let curtain = document.getElementById("curtain").checked;
+// 1. SETUP: PASTE YOUR KEY HERE
+// Go to aistudio.google.com to get this key.
+const API_KEY = "AIzaSyDJO0QmNIvvnEbz5cH3Mh3tNAaK4OBrBuc"; 
 
+async function checkSymptoms() {
+    
+    // --- STEP 1: GATHER DATA FROM HTML ---
+    let selectedSymptoms = [];
+
+    // Critical Red Flags
+    if (document.getElementById("floaters").checked) selectedSymptoms.push("Sudden Floaters");
+    if (document.getElementById("flashes").checked) selectedSymptoms.push("Flashes of Light");
+    if (document.getElementById("curtain").checked) selectedSymptoms.push("Curtain/Shadow over vision");
+    
     // Moderate Symptoms
-    let blurred = document.getElementById("blurred").checked;
-    let pain = document.getElementById("pain").checked;
-    let light = document.getElementById("light").checked;
+    if (document.getElementById("blurred").checked) selectedSymptoms.push("Blurred Vision");
+    if (document.getElementById("pain").checked) selectedSymptoms.push("Eye Pain");
+    if (document.getElementById("light").checked) selectedSymptoms.push("Light Sensitivity");
 
-    // Mild Symptoms(emergency) will have red alert
-    let strain = document.getElementById("strain").checked;
-    let dryness = document.getElementById("dryness").checked;
-    let redness = document.getElementById("redness").checked;
+    // Mild Symptoms
+    if (document.getElementById("strain").checked) selectedSymptoms.push("Eye Strain");
+    if (document.getElementById("dryness").checked) selectedSymptoms.push("Dry Eyes");
+    if (document.getElementById("redness").checked) selectedSymptoms.push("Redness");
 
-    // 2. result var
-    let titleText = "";
-    let messageText = "";
-    let boxColor = "";
-    let textColor = "";
-
-    // 3. LOGIC (The Rule-Based System)
-    
-    // Check Moderate Count (how many moderate symptoms are selected?)
-    let moderateCount = 0;
-    if (blurred) { moderateCount = moderateCount + 1; }
-    if (pain)    { moderateCount = moderateCount + 1; }
-    if (light)   { moderateCount = moderateCount + 1; }
-
-
-    // RULE 1: CRITICAL (Emergency)
-    // If ANY critical symptom is checked, this is the highest priority.
-    if (floaters || flashes || curtain) {
-        titleText = "⚠️ URGENT ATTENTION NEEDED";
-        messageText = "You have selected symptoms that could indicate a retinal issue or other urgent condition. Please go to an Eye Hospital or Emergency Room immediately.";
-        boxColor = "#ffcccc"; // Light red background
-        textColor = "#990000"; // Dark red text
-    }
-
-    // RULE 2: MULTIPLE MODERATE
-    // If Rule 1 was false, we check if 2 or more moderate symptoms exist.
-    else if (moderateCount >= 2) {
-        titleText = "Consult an Eye Doctor";
-        messageText = "You are experiencing multiple symptoms. It is highly recommended to schedule an appointment with an ophthalmologist soon.";
-        boxColor = "#fff3cd"; // Light yellow background
-        textColor = "#856404"; // Dark yellow/brown text
-    }
-
-    // RULE 3: MILD OR SINGLE MODERATE
-    // If they have mild symptoms OR just 1 moderate symptom.
-    else if (strain || dryness || redness || moderateCount === 1) {
-        titleText = "Rest & Monitor";
-        messageText = "Your symptoms appear mild. Try the 20-20-20 rule (look at something 20 feet away for 20 seconds every 20 minutes). If it gets worse, see a doctor.";
-        boxColor = "#d4edda"; // Light green background
-        textColor = "#155724"; // Dark green text
-    }
-
-    // RULE 4: NO SYMPTOMS SELECTED
-    else {
-        titleText = "No Symptoms Selected";
-        messageText = "Please select at least one symptom from the list above.";
-        boxColor = "#e2e3e5"; // Grey background
-        textColor = "#383d41"; // Dark grey text
-    }
-
-    // 4. DISPLAY THE RESULT
-    // Get the result box elements
+    // Get the HTML elements we need to change
     let resultBox = document.getElementById("result-box");
     let resultTitle = document.getElementById("result-title");
     let resultMessage = document.getElementById("result-message");
+    let button = document.querySelector("button");
 
-    // Put the text inside the HTML
-    resultTitle.innerText = titleText;
-    resultMessage.innerText = messageText;
+    // --- STEP 2: BASIC VALIDATION ---
+    // If list is empty, stop here.
+    if (selectedSymptoms.length === 0) {
+        alert("Please select at least one symptom.");
+        return;
+    }
 
-    // Apply the colors
-    resultBox.style.backgroundColor = boxColor;
-    resultBox.style.color = textColor;
+    // --- STEP 3: SHOW LOADING STATE ---
+    // Change button text so user knows something is happening
+    button.innerText = "Analyzing with AI...";
+    button.disabled = true; // Prevent double-clicking
+    resultBox.classList.add("hidden"); // Hide previous results if any
 
-    // Make the box visible (remove the 'hidden' class)
-    resultBox.classList.remove("hidden");
+    // --- STEP 4: CREATE THE PROMPT ---
+    // We tell the AI how to behave strictly.
+    const prompt = `
+        Act as a strictly rule-based medical triage assistant. 
+        The user has these eye symptoms: ${selectedSymptoms.join(", ")}.
+        
+        INSTRUCTIONS:
+        1. If specific critical symptoms (Floaters, Flashes, Curtain) are present, the status MUST be "URGENT CARE NEEDED".
+        2. If multiple moderate symptoms (Pain, Blur) are present, status is "Consult an Eye Doctor".
+        3. Otherwise, status is "Home Care & Monitor".
+        
+        OUTPUT FORMAT:
+        Provide the response in plain text. 
+        First line: The Status (from above).
+        Second line: A short, calm 2-sentence advice explaining why.
+        Do NOT mention "I am an AI". Do NOT give a diagnosis.
+    `;
+
+    // --- STEP 5: SEND TO GOOGLE GEMINI API ---
+    try {
+        // This is the "Fetch" command that talks to the internet
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                }),
+            }
+        );
+
+        // Convert the "raw" response to readable JSON data
+        const data = await response.json();
+
+        // Extract the actual text answer from the complex data structure
+        const aiText = data.candidates[0].content.parts[0].text;
+
+        // --- STEP 6: UPDATE THE WEBPAGE ---
+        resultTitle.innerText = "Assessment Result";
+        resultMessage.innerText = aiText;
+        
+        // Smart Color Logic: Check what the AI said to pick a color
+        if (aiText.includes("URGENT")) {
+            resultBox.style.backgroundColor = "#ffcccc"; // Red
+            resultBox.style.color = "#990000";
+        } else if (aiText.includes("Consult")) {
+            resultBox.style.backgroundColor = "#fff3cd"; // Yellow
+            resultBox.style.color = "#856404";
+        } else {
+            resultBox.style.backgroundColor = "#d4edda"; // Green
+            resultBox.style.color = "#155724";
+        }
+
+        // Reveal the box
+        resultBox.classList.remove("hidden");
+
+    } catch (error) {
+        // If internet fails or API key is wrong
+        console.error("Error:", error);
+        resultTitle.innerText = "Connection Error";
+        resultMessage.innerText = "Could not reach the AI. Please check your internet connection.";
+        resultBox.classList.remove("hidden");
+        resultBox.style.backgroundColor = "#e2e3e5"; // Grey
+    }
+
+    // --- STEP 7: RESET BUTTON ---
+    button.innerText = "Check Eye Health";
+    button.disabled = false;
 }
