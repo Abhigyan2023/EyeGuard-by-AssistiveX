@@ -1,6 +1,6 @@
 function checkSymptoms() {
-    // 1. GET THE CHECKBOXES (Inputs)
-    // We get elements by their specific IDs from the HTML file.
+    // 1. getting checkboxes (Inputs)
+    // taken elements by their specific id's from html file.
     
     // Critical Symptoms
     let floaters = document.getElementById("floaters").checked;
@@ -12,12 +12,12 @@ function checkSymptoms() {
     let pain = document.getElementById("pain").checked;
     let light = document.getElementById("light").checked;
 
-    // Mild Symptoms
+    // Mild Symptoms(emergency) will have red alert
     let strain = document.getElementById("strain").checked;
     let dryness = document.getElementById("dryness").checked;
     let redness = document.getElementById("redness").checked;
 
-    // 2. PREPARE THE RESULT VARIABLES
+    // 2. result var
     let titleText = "";
     let messageText = "";
     let boxColor = "";
