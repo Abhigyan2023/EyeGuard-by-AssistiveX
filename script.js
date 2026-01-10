@@ -1,89 +1,93 @@
-// 1. SETUP: PASTE YOUR KEY HERE
-// Go to aistudio.google.com to get this key.
-const API_KEY = "AIzaSyDJO0QmNIvvnEbz5cH3Mh3tNAaK4OBrBuc"; 
+// 1. SETUP: PASTE YOUR HUGGING FACE TOKEN HERE
+// Get it from: https://huggingface.co/settings/tokens
+const HF_TOKEN = "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"; 
+
+// We use the "Mistral-7B-Instruct" model. It's fast and good at medical logic.
+const MODEL_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3";
 
 async function checkSymptoms() {
     
-    // --- STEP 1: GATHER DATA FROM HTML ---
+    // --- STEP 1: GATHER DATA ---
     let selectedSymptoms = [];
 
-    // Critical Red Flags
+    // Critical
     if (document.getElementById("floaters").checked) selectedSymptoms.push("Sudden Floaters");
     if (document.getElementById("flashes").checked) selectedSymptoms.push("Flashes of Light");
     if (document.getElementById("curtain").checked) selectedSymptoms.push("Curtain/Shadow over vision");
     
-    // Moderate Symptoms
+    // Moderate
     if (document.getElementById("blurred").checked) selectedSymptoms.push("Blurred Vision");
     if (document.getElementById("pain").checked) selectedSymptoms.push("Eye Pain");
     if (document.getElementById("light").checked) selectedSymptoms.push("Light Sensitivity");
 
-    // Mild Symptoms
+    // Mild
     if (document.getElementById("strain").checked) selectedSymptoms.push("Eye Strain");
     if (document.getElementById("dryness").checked) selectedSymptoms.push("Dry Eyes");
     if (document.getElementById("redness").checked) selectedSymptoms.push("Redness");
 
-    // Get the HTML elements we need to change
+    // UI Elements
     let resultBox = document.getElementById("result-box");
     let resultTitle = document.getElementById("result-title");
     let resultMessage = document.getElementById("result-message");
     let button = document.querySelector("button");
 
-    // --- STEP 2: BASIC VALIDATION ---
-    // If list is empty, stop here.
+    // Basic Check
     if (selectedSymptoms.length === 0) {
         alert("Please select at least one symptom.");
         return;
     }
 
-    // --- STEP 3: SHOW LOADING STATE ---
-    // Change button text so user knows something is happening
-    button.innerText = "Analyzing with AI...";
-    button.disabled = true; // Prevent double-clicking
-    resultBox.classList.add("hidden"); // Hide previous results if any
+    // --- STEP 2: SHOW LOADING ---
+    button.innerText = "Analyzing with Hugging Face...";
+    button.disabled = true;
+    resultBox.classList.add("hidden");
 
-    // --- STEP 4: CREATE THE PROMPT ---
-    // We tell the AI how to behave strictly.
-    const prompt = `
-        Act as a strictly rule-based medical triage assistant. 
-        The user has these eye symptoms: ${selectedSymptoms.join(", ")}.
-        
-        INSTRUCTIONS:
-        1. If specific critical symptoms (Floaters, Flashes, Curtain) are present, the status MUST be "URGENT CARE NEEDED".
-        2. If multiple moderate symptoms (Pain, Blur) are present, status is "Consult an Eye Doctor".
-        3. Otherwise, status is "Home Care & Monitor".
-        
-        OUTPUT FORMAT:
-        Provide the response in plain text. 
-        First line: The Status (from above).
-        Second line: A short, calm 2-sentence advice explaining why.
-        Do NOT mention "I am an AI". Do NOT give a diagnosis.
-    `;
+    // --- STEP 3: PREPARE PROMPT ---
+    // Mistral model works best with this specific [INST] format
+    const prompt = `[INST] 
+    You are a strict medical triage assistant.
+    User symptoms: ${selectedSymptoms.join(", ")}.
+    
+    RULES:
+    1. If Critical (Floaters, Flashes, Curtain), start with "URGENT CARE NEEDED".
+    2. If Moderate (Pain, Blur), start with "Consult an Eye Doctor".
+    3. If Mild, start with "Home Care & Monitor".
+    
+    Return ONLY the status followed by 2 sentences of advice. Do not say "Here is the assessment".
+    [/INST]`;
 
-    // --- STEP 5: SEND TO GOOGLE GEMINI API ---
+    // --- STEP 4: CALL HUGGING FACE API ---
     try {
-        // This is the "Fetch" command that talks to the internet
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
-                }),
-            }
-        );
+        const response = await fetch(MODEL_URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${HF_TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                inputs: prompt,
+                parameters: {
+                    max_new_tokens: 150, // Limit answer length
+                    return_full_text: false // Don't repeat the prompt back to us
+                }
+            })
+        });
 
-        // Convert the "raw" response to readable JSON data
         const data = await response.json();
 
-        // Extract the actual text answer from the complex data structure
-        const aiText = data.candidates[0].content.parts[0].text;
+        // Check for specific Hugging Face errors (like "Model Loading")
+        if (data.error) {
+            throw new Error(data.error);
+        }
 
-        // --- STEP 6: UPDATE THE WEBPAGE ---
+        // --- STEP 5: DISPLAY RESULT ---
+        // Hugging Face returns an array: [{ generated_text: "..." }]
+        const aiText = data[0].generated_text.trim();
+
         resultTitle.innerText = "Assessment Result";
         resultMessage.innerText = aiText;
-        
-        // Smart Color Logic: Check what the AI said to pick a color
+
+        // Color Logic
         if (aiText.includes("URGENT")) {
             resultBox.style.backgroundColor = "#ffcccc"; // Red
             resultBox.style.color = "#990000";
@@ -95,19 +99,26 @@ async function checkSymptoms() {
             resultBox.style.color = "#155724";
         }
 
-        // Reveal the box
         resultBox.classList.remove("hidden");
 
     } catch (error) {
-        // If internet fails or API key is wrong
-        console.error("Error:", error);
-        resultTitle.innerText = "Connection Error";
-        resultMessage.innerText = "Could not reach the AI. Please check your internet connection.";
+        console.error("API Error:", error);
+        
+        // Handle "Model Loading" error specifically
+        if (error.message.includes("loading")) {
+            resultTitle.innerText = "Model is Waking Up...";
+            resultMessage.innerText = "The AI model is loading on the server (Cold Start). Please wait 20 seconds and try again.";
+            resultBox.style.backgroundColor = "#e2e3e5"; // Grey
+        } else {
+            resultTitle.innerText = "Connection Error";
+            resultMessage.innerText = "Could not reach Hugging Face. Check your token and internet.";
+            resultBox.style.backgroundColor = "#f8d7da"; // Pink error
+        }
+        
         resultBox.classList.remove("hidden");
-        resultBox.style.backgroundColor = "#e2e3e5"; // Grey
     }
 
-    // --- STEP 7: RESET BUTTON ---
+    // Reset Button
     button.innerText = "Check Eye Health";
     button.disabled = false;
 }
