@@ -1,9 +1,5 @@
-/* EyeGuard Core Logic 
-   Integration: Google Gemini 1.5 Flash / Advanced Multi-Tier Algorithm
-*/
 
-// --- API CONFIGURATION ---
-const API_KEY = "AIzaSyD-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"; 
+const API_KEY = ""; 
 const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash";
 const USE_CLOUD_INFERENCE = false; // Set to FALSE for offline demo stability
 
