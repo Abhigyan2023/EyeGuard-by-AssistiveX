@@ -4,7 +4,6 @@ EyeGuard is a simple, rule-based web application designed to help users recogniz
 
 This project focuses on awareness and early caution, especially for critical visual symptoms.
 
----
 
 ## 🚀 Features
 
@@ -20,7 +19,6 @@ This project focuses on awareness and early caution, especially for critical vis
 - Clear emergency warning for critical symptoms
 - Beginner-friendly, transparent logic
 
----
 
 ## 🛠️ Tech Stack
 
@@ -28,7 +26,6 @@ This project focuses on awareness and early caution, especially for critical vis
 - CSS
 - JavaScript (no frameworks, no backend)
 
----
 
 ## 🧠 How It Works
 
@@ -41,7 +38,6 @@ This project focuses on awareness and early caution, especially for critical vis
 
 This approach keeps the logic explainable and safe.
 
----
 
 ## ⚠️ Medical Disclaimer
 
@@ -58,7 +54,6 @@ Users should always consult a qualified eye care professional for medical advice
 2. Open `index.html` in any modern web browser
 3. No installation or internet connection required
 
----
 
 ## 🔮 Future Improvements
 
@@ -67,8 +62,3 @@ Users should always consult a qualified eye care professional for medical advice
 - Accessibility improvements
 - More detailed symptom explanations
 
----
-
-## 👤 Author
-
-Built as a hackathon project for the Healthcare & Assistive Technology track.
