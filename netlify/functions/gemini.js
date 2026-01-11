@@ -1,17 +1,19 @@
 // netlify/functions/gemini.js
 
 exports.handler = async function (event, context) {
-    // 1. Only allow POST requests (security)
+    console.log("Function triggered!"); // Debug log
+
+    // 1. Security: Only allow POST requests
     if (event.httpMethod !== "POST") {
         return { statusCode: 405, body: "Method Not Allowed" };
     }
 
     try {
-        // 2. Parse the symptoms sent from your frontend
+        // 2. Parse Input
         const body = JSON.parse(event.body);
         const symptoms = body.symptoms;
 
-        // 3. Define the Prompt
+        // 3. Define Prompt
         const prompt = `
             Act as a medical triage assistant.
             User symptoms: ${symptoms}.
@@ -22,8 +24,7 @@ exports.handler = async function (event, context) {
             - Keep explanation under 2 sentences.
         `;
 
-        // 4. Securely call Google Gemini
-        // We use the builtin fetch (available in Node 18+)
+        // 4. Call Google Gemini (Using Native Fetch)
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
             {
@@ -37,7 +38,13 @@ exports.handler = async function (event, context) {
 
         const data = await response.json();
 
-        // 5. Send the answer back to your frontend
+        // 5. Check for Errors from Google
+        if (data.error) {
+            console.error("Gemini API Error:", data.error);
+            throw new Error(data.error.message || "AI Service Error");
+        }
+
+        // 6. Return Result
         if (data.candidates && data.candidates.length > 0) {
             return {
                 statusCode: 200,
@@ -48,10 +55,10 @@ exports.handler = async function (event, context) {
         }
 
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Server Error:", error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: "Analysis Failed" })
+            body: JSON.stringify({ error: "Analysis Failed. Please try again." })
         };
     }
 };
