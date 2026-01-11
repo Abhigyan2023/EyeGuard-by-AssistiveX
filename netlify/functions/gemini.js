@@ -1,19 +1,24 @@
 // netlify/functions/gemini.js
 
 exports.handler = async function (event, context) {
-    console.log("Function triggered!"); // Debug log to prove it runs
+    console.log("Function triggered!"); 
 
-    // 1. Security: Only allow POST requests
     if (event.httpMethod !== "POST") {
         return { statusCode: 405, body: "Method Not Allowed" };
     }
 
     try {
-        // 2. Parse Input
         const body = JSON.parse(event.body);
         const symptoms = body.symptoms;
 
-        // 3. Define Prompt
+        // 1. FIX: Clean the API Key (Remove accidental spaces/newlines)
+        // This is likely why you were getting 404s!
+        const apiKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : "";
+
+        if (!apiKey) {
+            throw new Error("API Key is missing in Netlify settings.");
+        }
+
         const prompt = `
             Act as a medical triage assistant.
             User symptoms: ${symptoms}.
@@ -24,9 +29,9 @@ exports.handler = async function (event, context) {
             - Keep explanation under 2 sentences.
         `;
 
-        // 4. Call Google Gemini (Switched to 'gemini-pro' for stability)
+        // 2. USE STANDARD MODEL: gemini-1.5-flash (Fastest & Most Reliable)
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -38,13 +43,12 @@ exports.handler = async function (event, context) {
 
         const data = await response.json();
 
-        // 5. Check for Errors from Google
+        // Error Handling
         if (data.error) {
             console.error("Gemini API Error:", JSON.stringify(data.error, null, 2));
             throw new Error(data.error.message || "AI Service Error");
         }
 
-        // 6. Return Result
         if (data.candidates && data.candidates.length > 0) {
             return {
                 statusCode: 200,
