@@ -1,7 +1,7 @@
 // netlify/functions/gemini.js
 
 exports.handler = async function (event, context) {
-    console.log("Function triggered!"); // Debug log
+    console.log("Function triggered!"); // Debug log to prove it runs
 
     // 1. Security: Only allow POST requests
     if (event.httpMethod !== "POST") {
@@ -18,15 +18,15 @@ exports.handler = async function (event, context) {
             Act as a medical triage assistant.
             User symptoms: ${symptoms}.
             Rules:
-            - If Critical (Floaters, Flashes, Curtain), start with "URGENT CARE NEEDED".
-            - If Moderate (Pain, Blur), start with "Consult an Eye Doctor".
+            - If Critical (Floaters, Flashes, Curtain, Vision Loss), start with "URGENT CARE NEEDED".
+            - If Moderate (Pain, Blur, Haloes), start with "Consult an Eye Doctor".
             - If Mild, start with "Home Care & Monitor".
             - Keep explanation under 2 sentences.
         `;
 
-        // 4. Call Google Gemini (Using Native Fetch)
+        // 4. Call Google Gemini (Switched to 'gemini-pro' for stability)
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -40,7 +40,7 @@ exports.handler = async function (event, context) {
 
         // 5. Check for Errors from Google
         if (data.error) {
-            console.error("Gemini API Error:", data.error);
+            console.error("Gemini API Error:", JSON.stringify(data.error, null, 2));
             throw new Error(data.error.message || "AI Service Error");
         }
 
