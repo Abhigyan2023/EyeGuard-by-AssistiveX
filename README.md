@@ -2,7 +2,7 @@
 
 > **Winner/Project for [Insert Hackathon Name]** > *Instant, privacy-first eye health assessment using Serverless AI.*
 
-[🔴 Live Demo](https://assistivex.netlify.app/) | [📺 Video Demo](#) | [📄 Presentation](#)
+[🔴 Live Demo](https://assistivex.netlify.app/) | [📺 Video Demo](https://youtu.be/ZGPNdsWMObU) | 
 
 
 
@@ -75,9 +75,6 @@ This project requires a **Groq API Key** to function.
 - `GROQ_API_KEY`: Get a free key at [console.groq.com](https://console.groq.com).
 
 
-## 👥 Team
-* **[Your Name]** - Full Stack Developer
-* **[Teammate Name]** - [Role]
 
 
 *Disclaimer: EyeGuard is an AI-assisted triage tool, not a doctor. Always seek professional medical advice for serious symptoms.*
